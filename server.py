@@ -38,6 +38,7 @@ def init_db():
             room_code TEXT,
             name TEXT NOT NULL,
             text TEXT NOT NULL,
+            device_id TEXT,
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     """)
@@ -51,18 +52,26 @@ def init_db():
 def upgrade_db():
     conn = get_db()
 
+    # Check messages table columns
     columns = conn.execute(
         "PRAGMA table_info(messages)"
     ).fetchall()
 
     column_names = [column["name"] for column in columns]
 
+    # Add room_code if old database doesn't have it
     if "room_code" not in column_names:
         conn.execute(
             "ALTER TABLE messages ADD COLUMN room_code TEXT"
         )
-        conn.commit()
 
+    # Add device_id if old database doesn't have it
+    if "device_id" not in column_names:
+        conn.execute(
+            "ALTER TABLE messages ADD COLUMN device_id TEXT"
+        )
+
+    conn.commit()
     conn.close()
 
 
@@ -81,7 +90,7 @@ def get_messages():
     conn = get_db()
 
     rows = conn.execute("""
-        SELECT id, room_code, name, text, timestamp
+        SELECT id, room_code, name, text, device_id, timestamp
         FROM messages
         WHERE room_code = ?
         ORDER BY id ASC
@@ -109,6 +118,7 @@ def send_message():
     room_code = data.get("room_code", "").strip().upper()
     name = data.get("name", "").strip()
     text = data.get("text", "").strip()
+    device_id = data.get("device_id", "").strip()
 
     if not room_code:
         return jsonify({
@@ -118,6 +128,11 @@ def send_message():
     if not name or not text:
         return jsonify({
             "error": "Name and message are required"
+        }), 400
+
+    if not device_id:
+        return jsonify({
+            "error": "Device ID is required"
         }), 400
 
     conn = get_db()
@@ -137,9 +152,9 @@ def send_message():
 
     # Insert message
     cursor = conn.execute("""
-        INSERT INTO messages (room_code, name, text)
-        VALUES (?, ?, ?)
-    """, (room_code, name, text))
+        INSERT INTO messages (room_code, name, text, device_id)
+        VALUES (?, ?, ?, ?)
+    """, (room_code, name, text, device_id))
 
     conn.commit()
 
@@ -147,7 +162,7 @@ def send_message():
 
     # Get inserted message
     row = conn.execute("""
-        SELECT id, room_code, name, text, timestamp
+        SELECT id, room_code, name, text, device_id, timestamp
         FROM messages
         WHERE id = ?
     """, (message_id,)).fetchone()
@@ -223,10 +238,11 @@ def check_room(code):
 
 # ---------------- START SERVER ----------------
 
-init_db()
-upgrade_db()
-
 if __name__ == "__main__":
+
+    init_db()
+    upgrade_db()
+
     app.run(
         host="0.0.0.0",
         port=5000,
