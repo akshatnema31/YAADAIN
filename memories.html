@@ -8,6 +8,7 @@
     <title>Yaadain</title>
 
     <style>
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -17,6 +18,7 @@
         body {
             font-family: Arial, sans-serif;
             background: #f3eadb;
+
             height: 100vh;
 
             display: flex;
@@ -24,26 +26,38 @@
             align-items: center;
         }
 
+
+        /* ================================
+           CHAT CONTAINER
+        ================================= */
+
         .chat-container {
             width: 100%;
             max-width: 500px;
+
             height: 90vh;
 
             background: #fffaf2;
 
             border-radius: 20px;
+
             overflow: hidden;
 
             display: flex;
             flex-direction: column;
 
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            box-shadow:
+                0 10px 30px rgba(0, 0, 0, 0.15);
         }
 
-        /* ================= HEADER ================= */
+
+        /* ================================
+           HEADER
+        ================================= */
 
         .header {
             background: #1f4b4a;
+
             color: white;
 
             padding: 20px;
@@ -57,11 +71,16 @@
 
         .header p {
             font-size: 12px;
+
             opacity: 0.8;
+
             margin-top: 5px;
         }
 
-        /* ================= MESSAGES ================= */
+
+        /* ================================
+           MESSAGES AREA
+        ================================= */
 
         .messages {
             flex: 1;
@@ -76,6 +95,11 @@
             gap: 10px;
         }
 
+
+        /* ================================
+           MESSAGE
+        ================================= */
+
         .message {
             max-width: 75%;
 
@@ -84,28 +108,75 @@
             border-radius: 15px;
 
             font-size: 15px;
+
             line-height: 1.4;
 
             word-wrap: break-word;
+
+            position: relative;
         }
+
+
+        /* ================================
+           MY MESSAGE
+           RIGHT SIDE
+        ================================= */
 
         .mine {
             align-self: flex-end;
 
             background: #1f4b4a;
+
             color: white;
 
             border-bottom-right-radius: 4px;
         }
 
+
+        /* ================================
+           OTHER PERSON
+           LEFT SIDE
+        ================================= */
+
         .theirs {
             align-self: flex-start;
 
             background: #eee8dc;
+
             color: #222;
 
             border-bottom-left-radius: 4px;
         }
+
+
+        /* ================================
+           NAME
+        ================================= */
+
+        .sender-name {
+            font-size: 10px;
+
+            font-weight: bold;
+
+            margin-bottom: 4px;
+
+            opacity: 0.65;
+        }
+
+
+        .mine .sender-name {
+            color: #dce9e6;
+        }
+
+
+        .theirs .sender-name {
+            color: #1f4b4a;
+        }
+
+
+        /* ================================
+           TIME
+        ================================= */
 
         .time {
             font-size: 10px;
@@ -117,7 +188,10 @@
             text-align: right;
         }
 
-        /* ================= INPUT ================= */
+
+        /* ================================
+           INPUT AREA
+        ================================= */
 
         .input-area {
             padding: 15px;
@@ -130,6 +204,7 @@
 
             background: #fffaf2;
         }
+
 
         #messageInput {
             flex: 1;
@@ -145,12 +220,19 @@
             outline: none;
         }
 
+
         #messageInput:focus {
             border-color: #1f4b4a;
         }
 
+
+        /* ================================
+           SEND BUTTON
+        ================================= */
+
         #sendButton {
             width: 45px;
+
             height: 45px;
 
             border: none;
@@ -166,452 +248,581 @@
             cursor: pointer;
         }
 
+
         #sendButton:hover {
             background: #173936;
         }
+
 
         #sendButton:active {
             transform: scale(0.95);
         }
 
+
         #sendButton:disabled {
             opacity: 0.6;
+
             cursor: not-allowed;
         }
+
+
+        /* ================================
+           MOBILE
+        ================================= */
+
+        @media (max-width: 500px) {
+
+            body {
+                align-items: stretch;
+            }
+
+            .chat-container {
+                height: 100vh;
+
+                max-width: none;
+
+                border-radius: 0;
+            }
+
+            .messages {
+                padding: 15px;
+            }
+        }
+
     </style>
+
 </head>
+
 
 <body>
 
-    <div class="chat-container">
 
-        <!-- HEADER -->
-
-        <div class="header">
-
-            <h1>YAADAIN</h1>
-
-            <p>Our little space</p>
-
-        </div>
+<div class="chat-container">
 
 
-        <!-- MESSAGES -->
+    <!-- ================================
+         HEADER
+    ================================= -->
 
-        <div
-            class="messages"
-            id="messages"
-        ></div>
+    <div class="header">
 
+        <h1>YAADAIN</h1>
 
-        <!-- INPUT -->
-
-        <div class="input-area">
-
-            <input
-                type="text"
-                id="messageInput"
-                placeholder="Write a message..."
-                autocomplete="off"
-            >
-
-            <button
-                id="sendButton"
-                type="button"
-            >
-                ➤
-            </button>
-
-        </div>
+        <p>Our little space</p>
 
     </div>
 
 
-    <script>
+    <!-- ================================
+         MESSAGES
+    ================================= -->
 
-        // =====================================================
-        // BACKEND
-        // =====================================================
-
-        const API = "https://yaadain.onrender.com";
-
-
-        // =====================================================
-        // ELEMENTS
-        // =====================================================
-
-        const messageInput =
-            document.getElementById("messageInput");
-
-        const sendButton =
-            document.getElementById("sendButton");
-
-        const messages =
-            document.getElementById("messages");
+    <div
+        class="messages"
+        id="messages"
+    ></div>
 
 
-        // =====================================================
-        // GET ROOM CODE
-        // =====================================================
+    <!-- ================================
+         INPUT
+    ================================= -->
 
-        const urlParams =
-            new URLSearchParams(window.location.search);
+    <div class="input-area">
 
-        let roomCode =
-            urlParams.get("code");
+        <input
+            type="text"
+            id="messageInput"
+            placeholder="Write a message..."
+            autocomplete="off"
+        >
 
+        <button
+            id="sendButton"
+            type="button"
+        >
+            ➤
+        </button>
 
-        // If URL doesn't contain code,
-        // try localStorage
-
-        if (!roomCode) {
-
-            roomCode =
-                localStorage.getItem("roomCode");
-        }
-
-
-        // Normalize room code
-
-        if (roomCode) {
-
-            roomCode =
-                roomCode.trim().toUpperCase();
-        }
+    </div>
 
 
-        // =====================================================
-        // USER NAME
-        // =====================================================
-
-        const myName = "Akshat";
+</div>
 
 
-        // =====================================================
-        // CHECK ROOM CODE
-        // =====================================================
-
-        if (!roomCode) {
-
-            alert("No room code found.");
-
-            window.location.href = "index.html";
-        }
+<script>
 
 
-        // =====================================================
-        // SAVE ROOM CODE
-        // =====================================================
+/* =====================================================
+   API
+===================================================== */
 
-        if (roomCode) {
+const API =
+    "https://yaadain-backend.onrender.com";
 
-            localStorage.setItem(
-                "roomCode",
-                roomCode
+
+/* =====================================================
+   ELEMENTS
+===================================================== */
+
+const messageInput =
+    document.getElementById("messageInput");
+
+const sendButton =
+    document.getElementById("sendButton");
+
+const messages =
+    document.getElementById("messages");
+
+
+/* =====================================================
+   ROOM CODE
+===================================================== */
+
+const urlParams =
+    new URLSearchParams(
+        window.location.search
+    );
+
+const roomCode =
+    urlParams.get("code");
+
+
+/* =====================================================
+   DEVICE ID
+=====================================================
+
+   Every browser/device has its own ID.
+
+   Laptop:
+   device_xxxxx
+
+   Mobile:
+   device_yyyyy
+
+   Therefore we can know:
+
+   Current device → RIGHT
+   Other device   → LEFT
+===================================================== */
+
+let deviceId =
+    localStorage.getItem(
+        "yaadainDeviceId"
+    );
+
+
+if (!deviceId) {
+
+    deviceId =
+        "device_" +
+        crypto.randomUUID();
+
+    localStorage.setItem(
+        "yaadainDeviceId",
+        deviceId
+    );
+}
+
+
+console.log(
+    "Current Device ID:",
+    deviceId
+);
+
+
+/* =====================================================
+   USER NAME
+=====================================================
+
+   For now we keep the existing name.
+
+   Later we can add a proper
+   "Enter your name" screen.
+===================================================== */
+
+const myName = "Akshat";
+
+
+/* =====================================================
+   ROOM CHECK
+===================================================== */
+
+if (!roomCode) {
+
+    alert("No room code found.");
+
+}
+
+
+/* =====================================================
+   LOAD MESSAGES
+===================================================== */
+
+async function loadMessages() {
+
+    if (!roomCode) {
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${API}/messages?code=${encodeURIComponent(roomCode)}`
             );
-        }
 
 
-        // =====================================================
-        // DISPLAY MESSAGE
-        // =====================================================
+        if (!response.ok) {
 
-        function displayMessage(message) {
-
-            const messageBox =
-                document.createElement("div");
-
-
-            messageBox.classList.add(
-                "message"
+            throw new Error(
+                "Could not load messages"
             );
 
-
-            // Own message or other person's message
-
-            if (message.name === myName) {
-
-                messageBox.classList.add(
-                    "mine"
-                );
-
-            } else {
-
-                messageBox.classList.add(
-                    "theirs"
-                );
-            }
-
-
-            // Time
-
-            const time =
-                new Date(
-                    message.timestamp
-                ).toLocaleTimeString(
-                    [],
-                    {
-                        hour: "2-digit",
-                        minute: "2-digit"
-                    }
-                );
-
-
-            // Message content
-
-            messageBox.innerHTML = `
-                ${escapeHTML(message.text)}
-                <div class="time">
-                    ${time}
-                </div>
-            `;
-
-
-            messages.appendChild(
-                messageBox
-            );
         }
 
 
-        // =====================================================
-        // LOAD MESSAGES
-        // =====================================================
+        const data =
+            await response.json();
 
-        async function loadMessages() {
 
-            if (!roomCode) {
-                return;
-            }
+        messages.innerHTML = "";
 
 
-            try {
+        data.forEach(
+            message => {
 
-                const response =
-                    await fetch(
-                        `${API}/messages?code=${encodeURIComponent(roomCode)}`
-                    );
+                displayMessage(message);
 
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        "Could not load messages"
-                    );
-                }
-
-
-                const data =
-                    await response.json();
-
-
-                // Clear old messages
-
-                messages.innerHTML = "";
-
-
-                // Display all messages
-
-                data.forEach(
-                    function(message) {
-
-                        displayMessage(
-                            message
-                        );
-                    }
-                );
-
-
-                // Scroll to bottom
-
-                messages.scrollTop =
-                    messages.scrollHeight;
-
-
-            } catch (error) {
-
-                console.error(
-                    "Could not load messages:",
-                    error
-                );
-            }
-        }
-
-
-        // =====================================================
-        // SEND MESSAGE
-        // =====================================================
-
-        async function sendMessage() {
-
-            const text =
-                messageInput.value.trim();
-
-
-            if (!text) {
-                return;
-            }
-
-
-            if (!roomCode) {
-
-                alert(
-                    "No room code found."
-                );
-
-                return;
-            }
-
-
-            sendButton.disabled = true;
-
-
-            try {
-
-                console.log(
-                    "Sending message to room:",
-                    roomCode
-                );
-
-
-                const response =
-                    await fetch(
-                        `${API}/messages`,
-                        {
-                            method: "POST",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-
-                            body: JSON.stringify({
-
-                                room_code:
-                                    roomCode,
-
-                                name:
-                                    myName,
-
-                                text:
-                                    text
-                            })
-                        }
-                    );
-
-
-                const data =
-                    await response.json();
-
-
-                console.log(
-                    "Send message response:",
-                    data
-                );
-
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        data.error ||
-                        "Message could not be sent"
-                    );
-                }
-
-
-                // Clear input
-
-                messageInput.value = "";
-
-
-                // Reload messages
-
-                await loadMessages();
-
-
-            } catch (error) {
-
-                console.error(
-                    "Send message error:",
-                    error
-                );
-
-
-                alert(
-                    "Message not sent: " +
-                    error.message
-                );
-
-
-            } finally {
-
-                sendButton.disabled =
-                    false;
-
-                messageInput.focus();
-            }
-        }
-
-
-        // =====================================================
-        // SEND BUTTON
-        // =====================================================
-
-        sendButton.addEventListener(
-            "click",
-            sendMessage
-        );
-
-
-        // =====================================================
-        // ENTER KEY
-        // =====================================================
-
-        messageInput.addEventListener(
-            "keydown",
-            function(event) {
-
-                if (event.key === "Enter") {
-
-                    event.preventDefault();
-
-                    sendMessage();
-                }
             }
         );
 
 
-        // =====================================================
-        // ESCAPE HTML
-        // =====================================================
+        messages.scrollTop =
+            messages.scrollHeight;
 
-        function escapeHTML(text) {
+    }
 
-            const div =
-                document.createElement("div");
 
-            div.textContent = text;
+    catch (error) {
 
-            return div.innerHTML;
+        console.error(
+            "Could not load messages:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   DISPLAY MESSAGE
+===================================================== */
+
+function displayMessage(message) {
+
+
+    const messageBox =
+        document.createElement("div");
+
+
+    messageBox.classList.add(
+        "message"
+    );
+
+
+    /*
+    ================================================
+    IMPORTANT PART
+
+    Compare message.device_id
+    with OUR deviceId.
+
+    Same device:
+        RIGHT
+
+    Different device:
+        LEFT
+    ================================================
+    */
+
+    if (
+        message.device_id &&
+        message.device_id === deviceId
+    ) {
+
+        messageBox.classList.add(
+            "mine"
+        );
+
+    }
+
+    else {
+
+        messageBox.classList.add(
+            "theirs"
+        );
+
+    }
+
+
+    /* ================================================
+       SENDER NAME
+    ================================================ */
+
+    const senderName =
+        document.createElement("div");
+
+    senderName.classList.add(
+        "sender-name"
+    );
+
+    senderName.textContent =
+        message.name || "Unknown";
+
+
+    /* ================================================
+       MESSAGE TEXT
+    ================================================ */
+
+    const messageText =
+        document.createElement("div");
+
+    messageText.textContent =
+        message.text;
+
+
+    /* ================================================
+       TIME
+    ================================================ */
+
+    const time =
+        document.createElement("div");
+
+    time.classList.add(
+        "time"
+    );
+
+
+    const date =
+        new Date(
+            message.timestamp
+        );
+
+
+    if (!isNaN(date.getTime())) {
+
+        time.textContent =
+            date.toLocaleTimeString(
+                [],
+                {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                }
+            );
+
+    }
+
+    else {
+
+        time.textContent = "";
+
+    }
+
+
+    /* ================================================
+       BUILD MESSAGE
+    ================================================ */
+
+    messageBox.appendChild(
+        senderName
+    );
+
+    messageBox.appendChild(
+        messageText
+    );
+
+    messageBox.appendChild(
+        time
+    );
+
+
+    messages.appendChild(
+        messageBox
+    );
+
+}
+
+
+/* =====================================================
+   SEND MESSAGE
+===================================================== */
+
+async function sendMessage() {
+
+
+    const text =
+        messageInput.value.trim();
+
+
+    if (
+        !text ||
+        !roomCode
+    ) {
+
+        return;
+
+    }
+
+
+    sendButton.disabled = true;
+
+
+    try {
+
+
+        const response =
+            await fetch(
+                `${API}/messages`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            room_code:
+                                roomCode,
+
+                            name:
+                                myName,
+
+                            text:
+                                text,
+
+                            device_id:
+                                deviceId
+
+                        })
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "Send response:",
+            data
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                "Message could not be sent"
+            );
+
         }
 
 
-        // =====================================================
-        // INITIAL LOAD
-        // =====================================================
-
-        loadMessages();
+        messageInput.value = "";
 
 
-        // =====================================================
-        // AUTO REFRESH
-        // =====================================================
+        await loadMessages();
 
-        setInterval(
-            loadMessages,
-            2000
+    }
+
+
+    catch (error) {
+
+        console.error(
+            "Send message error:",
+            error
         );
 
-    </script>
+
+        alert(
+            "Message not sent: " +
+            error.message
+        );
+
+    }
+
+
+    finally {
+
+        sendButton.disabled =
+            false;
+
+        messageInput.focus();
+
+    }
+
+}
+
+
+/* =====================================================
+   SEND BUTTON
+===================================================== */
+
+sendButton.addEventListener(
+    "click",
+    sendMessage
+);
+
+
+/* =====================================================
+   ENTER TO SEND
+===================================================== */
+
+messageInput.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key === "Enter"
+        ) {
+
+            event.preventDefault();
+
+            sendMessage();
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   INITIAL LOAD
+===================================================== */
+
+loadMessages();
+
+
+/* =====================================================
+   AUTO REFRESH
+=====================================================
+
+   Checks for new messages every 2 seconds.
+===================================================== */
+
+setInterval(
+    loadMessages,
+    2000
+);
+
+
+</script>
+
 
 </body>
 
