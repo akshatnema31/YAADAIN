@@ -26,11 +26,6 @@
             align-items: center;
         }
 
-
-        /* ================================
-           CHAT CONTAINER
-        ================================= */
-
         .chat-container {
             width: 100%;
             max-width: 500px;
@@ -49,11 +44,6 @@
             box-shadow:
                 0 10px 30px rgba(0, 0, 0, 0.15);
         }
-
-
-        /* ================================
-           HEADER
-        ================================= */
 
         .header {
             background: #1f4b4a;
@@ -77,11 +67,6 @@
             margin-top: 5px;
         }
 
-
-        /* ================================
-           MESSAGES AREA
-        ================================= */
-
         .messages {
             flex: 1;
 
@@ -94,11 +79,6 @@
 
             gap: 10px;
         }
-
-
-        /* ================================
-           MESSAGE
-        ================================= */
 
         .message {
             max-width: 75%;
@@ -116,12 +96,6 @@
             position: relative;
         }
 
-
-        /* ================================
-           MY MESSAGE
-           RIGHT SIDE
-        ================================= */
-
         .mine {
             align-self: flex-end;
 
@@ -131,12 +105,6 @@
 
             border-bottom-right-radius: 4px;
         }
-
-
-        /* ================================
-           OTHER PERSON
-           LEFT SIDE
-        ================================= */
 
         .theirs {
             align-self: flex-start;
@@ -148,11 +116,6 @@
             border-bottom-left-radius: 4px;
         }
 
-
-        /* ================================
-           NAME
-        ================================= */
-
         .sender-name {
             font-size: 10px;
 
@@ -163,20 +126,13 @@
             opacity: 0.65;
         }
 
-
         .mine .sender-name {
             color: #dce9e6;
         }
 
-
         .theirs .sender-name {
             color: #1f4b4a;
         }
-
-
-        /* ================================
-           TIME
-        ================================= */
 
         .time {
             font-size: 10px;
@@ -187,11 +143,6 @@
 
             text-align: right;
         }
-
-
-        /* ================================
-           INPUT AREA
-        ================================= */
 
         .input-area {
             padding: 15px;
@@ -204,7 +155,6 @@
 
             background: #fffaf2;
         }
-
 
         #messageInput {
             flex: 1;
@@ -220,15 +170,9 @@
             outline: none;
         }
 
-
         #messageInput:focus {
             border-color: #1f4b4a;
         }
-
-
-        /* ================================
-           SEND BUTTON
-        ================================= */
 
         #sendButton {
             width: 45px;
@@ -248,27 +192,19 @@
             cursor: pointer;
         }
 
-
         #sendButton:hover {
             background: #173936;
         }
 
-
         #sendButton:active {
             transform: scale(0.95);
         }
-
 
         #sendButton:disabled {
             opacity: 0.6;
 
             cursor: not-allowed;
         }
-
-
-        /* ================================
-           MOBILE
-        ================================= */
 
         @media (max-width: 500px) {
 
@@ -293,16 +229,9 @@
 
 </head>
 
-
 <body>
 
-
 <div class="chat-container">
-
-
-    <!-- ================================
-         HEADER
-    ================================= -->
 
     <div class="header">
 
@@ -312,20 +241,10 @@
 
     </div>
 
-
-    <!-- ================================
-         MESSAGES
-    ================================= -->
-
     <div
         class="messages"
         id="messages"
     ></div>
-
-
-    <!-- ================================
-         INPUT
-    ================================= -->
 
     <div class="input-area">
 
@@ -345,18 +264,21 @@
 
     </div>
 
-
 </div>
 
 
 <script>
 
-
 /* =====================================================
    API
 ===================================================== */
 
+/* IMPORTANT:
+   ONLY plain URL here.
+*/
+
 const API = "https://yaadain.onrender.com";
+
 
 /* =====================================================
    ELEMENTS
@@ -387,20 +309,6 @@ const roomCode =
 
 /* =====================================================
    DEVICE ID
-=====================================================
-
-   Every browser/device has its own ID.
-
-   Laptop:
-   device_xxxxx
-
-   Mobile:
-   device_yyyyy
-
-   Therefore we can know:
-
-   Current device → RIGHT
-   Other device   → LEFT
 ===================================================== */
 
 let deviceId =
@@ -430,12 +338,6 @@ console.log(
 
 /* =====================================================
    USER NAME
-=====================================================
-
-   For now we keep the existing name.
-
-   Later we can add a proper
-   "Enter your name" screen.
 ===================================================== */
 
 const myName = "Akshat";
@@ -461,7 +363,6 @@ async function loadMessages() {
     if (!roomCode) {
         return;
     }
-
 
     try {
 
@@ -520,7 +421,6 @@ async function loadMessages() {
 
 function displayMessage(message) {
 
-
     const messageBox =
         document.createElement("div");
 
@@ -531,18 +431,8 @@ function displayMessage(message) {
 
 
     /*
-    ================================================
-    IMPORTANT PART
-
-    Compare message.device_id
-    with OUR deviceId.
-
-    Same device:
-        RIGHT
-
-    Different device:
-        LEFT
-    ================================================
+       SAME DEVICE  -> RIGHT
+       OTHER DEVICE -> LEFT
     */
 
     if (
@@ -565,9 +455,7 @@ function displayMessage(message) {
     }
 
 
-    /* ================================================
-       SENDER NAME
-    ================================================ */
+    /* SENDER NAME */
 
     const senderName =
         document.createElement("div");
@@ -580,9 +468,7 @@ function displayMessage(message) {
         message.name || "Unknown";
 
 
-    /* ================================================
-       MESSAGE TEXT
-    ================================================ */
+    /* MESSAGE TEXT */
 
     const messageText =
         document.createElement("div");
@@ -591,9 +477,7 @@ function displayMessage(message) {
         message.text;
 
 
-    /* ================================================
-       TIME
-    ================================================ */
+    /* TIME */
 
     const time =
         document.createElement("div");
@@ -629,9 +513,7 @@ function displayMessage(message) {
     }
 
 
-    /* ================================================
-       BUILD MESSAGE
-    ================================================ */
+    /* BUILD */
 
     messageBox.appendChild(
         senderName
@@ -659,7 +541,6 @@ function displayMessage(message) {
 
 async function sendMessage() {
 
-
     const text =
         messageInput.value.trim();
 
@@ -678,7 +559,6 @@ async function sendMessage() {
 
 
     try {
-
 
         const response =
             await fetch(
@@ -808,16 +688,12 @@ loadMessages();
 
 /* =====================================================
    AUTO REFRESH
-=====================================================
-
-   Checks for new messages every 2 seconds.
 ===================================================== */
 
 setInterval(
     loadMessages,
     2000
 );
-
 
 </script>
 
