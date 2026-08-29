@@ -223,11 +223,10 @@ def check_room(code):
 
 # ---------------- START SERVER ----------------
 
+init_db()
+upgrade_db()
+
 if __name__ == "__main__":
-
-    init_db()
-    upgrade_db()
-
     app.run(
         host="0.0.0.0",
         port=5000,
