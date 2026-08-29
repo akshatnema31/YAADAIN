@@ -340,8 +340,21 @@ console.log(
    USER NAME
 ===================================================== */
 
-const myName = "Akshat";
+let myName = localStorage.getItem("yaadainName");
 
+if (!myName) {
+    myName = prompt("Enter your name:");
+
+    if (!myName || !myName.trim()) {
+        myName = "Guest";
+    }
+
+    myName = myName.trim();
+
+    localStorage.setItem("yaadainName", myName);
+}
+
+console.log("Current Name:", myName);
 
 /* =====================================================
    ROOM CHECK
