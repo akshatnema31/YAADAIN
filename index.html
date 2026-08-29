@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Yaadain</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            font-family: Arial, sans-serif;
+
+            background:
+                radial-gradient(
+                    900px 500px at 10% -10%,
+                    #f8f2e4 0%,
+                    #f3ecdc 55%
+                ),
+                #f3ecdc;
+
+            color: #2b2a28;
+            padding: 24px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+
+            background: #eae1cc;
+
+            border-radius: 22px;
+
+            padding: 38px 28px 34px;
+
+            text-align: center;
+
+            box-shadow:
+                0 20px 40px rgba(43, 42, 40, 0.12);
+        }
+
+        /* PHOTO */
+
+        .hero-image {
+            width: 360px;
+            max-width: 85vw;
+            height: auto;
+
+            display: block;
+
+            margin: 0 auto 24px;
+
+            border-radius: 16px;
+        }
+
+        /* TITLE */
+
+        h1 {
+            margin: 0;
+
+            font-size: 32px;
+
+            letter-spacing: 2px;
+
+            color: #1f4b4a;
+        }
+
+        .subtitle {
+            margin-top: 8px;
+
+            color: #5b5750;
+
+            font-size: 14px;
+        }
+
+        /* CODE AREA */
+
+        .code-section {
+            margin-top: 32px;
+        }
+
+        .code-section p {
+            margin: 0 0 12px;
+
+            font-size: 13px;
+
+            color: #5b5750;
+        }
+
+        .code-input {
+            width: 100%;
+
+            padding: 14px 16px;
+
+            border-radius: 12px;
+
+            border: 1px solid rgba(43, 42, 40, 0.18);
+
+            background: white;
+
+            color: #2b2a28;
+
+            font-size: 16px;
+
+            text-align: center;
+
+            letter-spacing: 3px;
+
+            outline: none;
+
+            text-transform: uppercase;
+        }
+
+        .code-input:focus {
+            border-color: #1f4b4a;
+        }
+
+        .enter-button {
+            width: 100%;
+
+            margin-top: 12px;
+
+            padding: 14px;
+
+            border: none;
+
+            border-radius: 12px;
+
+            background: #1f4b4a;
+
+            color: #f3ecdc;
+
+            font-size: 15px;
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+            transition: 0.15s ease;
+        }
+
+        .enter-button:hover {
+            background: #173936;
+        }
+
+        .enter-button:active {
+            transform: scale(0.98);
+        }
+
+        .enter-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .error {
+            min-height: 18px;
+
+            margin-top: 10px;
+
+            font-size: 12px;
+
+            color: #8c3a3a;
+        }
+
+        /* CREATE SPACE */
+
+        .divider {
+            margin: 26px 0;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            color: #8b867b;
+
+            font-size: 11px;
+
+            letter-spacing: 1px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+
+            flex: 1;
+
+            border-top: 1px solid rgba(43, 42, 40, 0.15);
+        }
+
+        .create-button {
+            background: transparent;
+
+            border: 1px solid #1f4b4a;
+
+            color: #1f4b4a;
+
+            padding: 11px 22px;
+
+            border-radius: 10px;
+
+            font-size: 13px;
+
+            cursor: pointer;
+        }
+
+        .create-button:hover {
+            background: #dce9e6;
+        }
+
+        .create-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 500px) {
+
+            body {
+                padding: 14px;
+            }
+
+            .container {
+                padding: 28px 20px;
+            }
+
+            .hero-image {
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- PHOTO -->
+
+        <img
+            src="new.png"
+            alt="Yaadain"
+            class="hero-image"
+        >
+
+        <!-- TITLE -->
+
+        <h1></h1>
+
+        <div class="subtitle">
+            A little space, just for us.
+        </div>
+
+        <!-- CODE -->
+
+        <div class="code-section">
+
+            <p>Enter your private code</p>
+
+            <input
+                type="text"
+                id="codeInput"
+                class="code-input"
+                placeholder="ENTER CODE"
+                maxlength="6"
+                autocomplete="off"
+            >
+
+            <button
+                class="enter-button"
+                id="enterButton"
+                type="button"
+            >
+                ENTER
+            </button>
+
+            <div
+                class="error"
+                id="errorMessage"
+            ></div>
+
+        </div>
+
+        <!-- DIVIDER -->
+
+        <div class="divider">
+            OR
+        </div>
+
+        <!-- CREATE -->
+
+        <button
+            class="create-button"
+            id="createButton"
+            type="button"
+        >
+            CREATE NEW SPACE
+        </button>
+
+    </div>
+
+
+    <script>
+
+        // =========================================
+        // BACKEND URL
+        // =========================================
+
+        const API = "http://127.0.0.1:5000";
+
+
+        // =========================================
+        // ELEMENTS
+        // =========================================
+
+        const codeInput =
+            document.getElementById("codeInput");
+
+        const enterButton =
+            document.getElementById("enterButton");
+
+        const createButton =
+            document.getElementById("createButton");
+
+        const errorMessage =
+            document.getElementById("errorMessage");
+
+
+        // =========================================
+        // ENTER ROOM
+        // =========================================
+
+        async function enterRoom() {
+
+            const code =
+                codeInput.value.trim().toUpperCase();
+
+
+            // Empty code
+
+            if (!code) {
+
+                errorMessage.textContent =
+                    "Please enter your room code.";
+
+                return;
+            }
+
+
+            // Clear previous error
+
+            errorMessage.textContent = "";
+
+
+            // Button state
+
+            enterButton.disabled = true;
+
+            enterButton.textContent = "CHECKING...";
+
+
+            try {
+
+                console.log(
+                    "Checking room:",
+                    code
+                );
+
+
+                // Ask backend whether room exists
+
+                const response = await fetch(
+                    `${API}/check-room/${encodeURIComponent(code)}`
+                );
+
+
+                const data =
+                    await response.json();
+
+
+                console.log(
+                    "Room check response:",
+                    data
+                );
+
+
+                // =====================================
+                // IMPORTANT
+                //
+                // Backend returns:
+                //
+                // {
+                //     "exists": true,
+                //     "code": "ABC123"
+                // }
+                //
+                // So we MUST check data.exists
+                // =====================================
+
+                if (
+                    !response.ok ||
+                    data.exists !== true
+                ) {
+
+                    errorMessage.textContent =
+                        "Invalid room code. ❌";
+
+                    return;
+                }
+
+
+                // =====================================
+                // ROOM IS VALID
+                // =====================================
+
+                localStorage.setItem(
+                    "roomCode",
+                    code
+                );
+
+
+                console.log(
+                    "Room valid. Opening chat..."
+                );
+
+
+                // Open memories page
+
+                window.location.href =
+                    "memories.html?code=" +
+                    encodeURIComponent(code);
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Room check error:",
+                    error
+                );
+
+
+                errorMessage.textContent =
+                    "Could not connect to server. ❌";
+            }
+
+            finally {
+
+                enterButton.disabled = false;
+
+                enterButton.textContent =
+                    "ENTER";
+            }
+        }
+
+
+        // =========================================
+        // ENTER BUTTON
+        // =========================================
+
+        enterButton.addEventListener(
+            "click",
+            enterRoom
+        );
+
+
+        // =========================================
+        // ENTER KEY
+        // =========================================
+
+        codeInput.addEventListener(
+            "keydown",
+            function(event) {
+
+                if (event.key === "Enter") {
+
+                    event.preventDefault();
+
+                    enterRoom();
+                }
+
+            }
+        );
+
+
+        // =========================================
+        // CREATE NEW SPACE
+        // =========================================
+
+        createButton.addEventListener(
+            "click",
+            async function() {
+
+                createButton.disabled = true;
+
+                createButton.textContent =
+                    "CREATING...";
+
+                errorMessage.textContent = "";
+
+
+                try {
+
+                    console.log(
+                        "Creating new room..."
+                    );
+
+
+                    // Create room in backend
+
+                    const response = await fetch(
+                        `${API}/create-room`,
+                        {
+                            method: "POST"
+                        }
+                    );
+
+
+                    const data =
+                        await response.json();
+
+
+                    console.log(
+                        "Create room response:",
+                        data
+                    );
+
+
+                    if (
+                        !response.ok ||
+                        !data.code
+                    ) {
+
+                        throw new Error(
+                            data.error ||
+                            "Room creation failed"
+                        );
+                    }
+
+
+                    // =================================
+                    // SAVE GENERATED CODE
+                    // =================================
+
+                    const code =
+                        data.code.toUpperCase();
+
+
+                    codeInput.value = code;
+
+
+                    localStorage.setItem(
+                        "roomCode",
+                        code
+                    );
+
+
+                    // =================================
+                    // SHOW CODE
+                    // =================================
+
+                    alert(
+                        "Your private code is: " +
+                        code
+                    );
+
+
+                    codeInput.focus();
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "Create room error:",
+                        error
+                    );
+
+
+                    alert(
+                        "Room create nahi hua. Backend check karo."
+                    );
+
+                }
+
+                finally {
+
+                    createButton.disabled = false;
+
+                    createButton.textContent =
+                        "CREATE NEW SPACE";
+                }
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>

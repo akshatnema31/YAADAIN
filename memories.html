@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Yaadain</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3eadb;
+            height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 500px;
+            height: 90vh;
+
+            background: #fffaf2;
+
+            border-radius: 20px;
+            overflow: hidden;
+
+            display: flex;
+            flex-direction: column;
+
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        /* ================= HEADER ================= */
+
+        .header {
+            background: #1f4b4a;
+            color: white;
+
+            padding: 20px;
+
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 22px;
+        }
+
+        .header p {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        /* ================= MESSAGES ================= */
+
+        .messages {
+            flex: 1;
+
+            padding: 20px;
+
+            overflow-y: auto;
+
+            display: flex;
+            flex-direction: column;
+
+            gap: 10px;
+        }
+
+        .message {
+            max-width: 75%;
+
+            padding: 10px 14px;
+
+            border-radius: 15px;
+
+            font-size: 15px;
+            line-height: 1.4;
+
+            word-wrap: break-word;
+        }
+
+        .mine {
+            align-self: flex-end;
+
+            background: #1f4b4a;
+            color: white;
+
+            border-bottom-right-radius: 4px;
+        }
+
+        .theirs {
+            align-self: flex-start;
+
+            background: #eee8dc;
+            color: #222;
+
+            border-bottom-left-radius: 4px;
+        }
+
+        .time {
+            font-size: 10px;
+
+            opacity: 0.6;
+
+            margin-top: 4px;
+
+            text-align: right;
+        }
+
+        /* ================= INPUT ================= */
+
+        .input-area {
+            padding: 15px;
+
+            display: flex;
+
+            gap: 10px;
+
+            border-top: 1px solid #ddd;
+
+            background: #fffaf2;
+        }
+
+        #messageInput {
+            flex: 1;
+
+            border: 1px solid #ccc;
+
+            border-radius: 25px;
+
+            padding: 12px 16px;
+
+            font-size: 15px;
+
+            outline: none;
+        }
+
+        #messageInput:focus {
+            border-color: #1f4b4a;
+        }
+
+        #sendButton {
+            width: 45px;
+            height: 45px;
+
+            border: none;
+
+            border-radius: 50%;
+
+            background: #1f4b4a;
+
+            color: white;
+
+            font-size: 18px;
+
+            cursor: pointer;
+        }
+
+        #sendButton:hover {
+            background: #173936;
+        }
+
+        #sendButton:active {
+            transform: scale(0.95);
+        }
+
+        #sendButton:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="chat-container">
+
+        <!-- HEADER -->
+
+        <div class="header">
+
+            <h1>YAADAIN</h1>
+
+            <p>Our little space</p>
+
+        </div>
+
+
+        <!-- MESSAGES -->
+
+        <div
+            class="messages"
+            id="messages"
+        ></div>
+
+
+        <!-- INPUT -->
+
+        <div class="input-area">
+
+            <input
+                type="text"
+                id="messageInput"
+                placeholder="Write a message..."
+                autocomplete="off"
+            >
+
+            <button
+                id="sendButton"
+                type="button"
+            >
+                ➤
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        // =====================================================
+        // BACKEND
+        // =====================================================
+
+        const API = "http://127.0.0.1:5000";
+
+
+        // =====================================================
+        // ELEMENTS
+        // =====================================================
+
+        const messageInput =
+            document.getElementById("messageInput");
+
+        const sendButton =
+            document.getElementById("sendButton");
+
+        const messages =
+            document.getElementById("messages");
+
+
+        // =====================================================
+        // GET ROOM CODE
+        // =====================================================
+
+        const urlParams =
+            new URLSearchParams(window.location.search);
+
+        let roomCode =
+            urlParams.get("code");
+
+
+        // If URL doesn't contain code,
+        // try localStorage
+
+        if (!roomCode) {
+
+            roomCode =
+                localStorage.getItem("roomCode");
+        }
+
+
+        // Normalize room code
+
+        if (roomCode) {
+
+            roomCode =
+                roomCode.trim().toUpperCase();
+        }
+
+
+        // =====================================================
+        // USER NAME
+        // =====================================================
+
+        const myName = "Akshat";
+
+
+        // =====================================================
+        // CHECK ROOM CODE
+        // =====================================================
+
+        if (!roomCode) {
+
+            alert("No room code found.");
+
+            window.location.href = "index.html";
+        }
+
+
+        // =====================================================
+        // SAVE ROOM CODE
+        // =====================================================
+
+        if (roomCode) {
+
+            localStorage.setItem(
+                "roomCode",
+                roomCode
+            );
+        }
+
+
+        // =====================================================
+        // DISPLAY MESSAGE
+        // =====================================================
+
+        function displayMessage(message) {
+
+            const messageBox =
+                document.createElement("div");
+
+
+            messageBox.classList.add(
+                "message"
+            );
+
+
+            // Own message or other person's message
+
+            if (message.name === myName) {
+
+                messageBox.classList.add(
+                    "mine"
+                );
+
+            } else {
+
+                messageBox.classList.add(
+                    "theirs"
+                );
+            }
+
+
+            // Time
+
+            const time =
+                new Date(
+                    message.timestamp
+                ).toLocaleTimeString(
+                    [],
+                    {
+                        hour: "2-digit",
+                        minute: "2-digit"
+                    }
+                );
+
+
+            // Message content
+
+            messageBox.innerHTML = `
+                ${escapeHTML(message.text)}
+                <div class="time">
+                    ${time}
+                </div>
+            `;
+
+
+            messages.appendChild(
+                messageBox
+            );
+        }
+
+
+        // =====================================================
+        // LOAD MESSAGES
+        // =====================================================
+
+        async function loadMessages() {
+
+            if (!roomCode) {
+                return;
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${API}/messages?code=${encodeURIComponent(roomCode)}`
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Could not load messages"
+                    );
+                }
+
+
+                const data =
+                    await response.json();
+
+
+                // Clear old messages
+
+                messages.innerHTML = "";
+
+
+                // Display all messages
+
+                data.forEach(
+                    function(message) {
+
+                        displayMessage(
+                            message
+                        );
+                    }
+                );
+
+
+                // Scroll to bottom
+
+                messages.scrollTop =
+                    messages.scrollHeight;
+
+
+            } catch (error) {
+
+                console.error(
+                    "Could not load messages:",
+                    error
+                );
+            }
+        }
+
+
+        // =====================================================
+        // SEND MESSAGE
+        // =====================================================
+
+        async function sendMessage() {
+
+            const text =
+                messageInput.value.trim();
+
+
+            if (!text) {
+                return;
+            }
+
+
+            if (!roomCode) {
+
+                alert(
+                    "No room code found."
+                );
+
+                return;
+            }
+
+
+            sendButton.disabled = true;
+
+
+            try {
+
+                console.log(
+                    "Sending message to room:",
+                    roomCode
+                );
+
+
+                const response =
+                    await fetch(
+                        `${API}/messages`,
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+
+                                room_code:
+                                    roomCode,
+
+                                name:
+                                    myName,
+
+                                text:
+                                    text
+                            })
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                console.log(
+                    "Send message response:",
+                    data
+                );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error ||
+                        "Message could not be sent"
+                    );
+                }
+
+
+                // Clear input
+
+                messageInput.value = "";
+
+
+                // Reload messages
+
+                await loadMessages();
+
+
+            } catch (error) {
+
+                console.error(
+                    "Send message error:",
+                    error
+                );
+
+
+                alert(
+                    "Message not sent: " +
+                    error.message
+                );
+
+
+            } finally {
+
+                sendButton.disabled =
+                    false;
+
+                messageInput.focus();
+            }
+        }
+
+
+        // =====================================================
+        // SEND BUTTON
+        // =====================================================
+
+        sendButton.addEventListener(
+            "click",
+            sendMessage
+        );
+
+
+        // =====================================================
+        // ENTER KEY
+        // =====================================================
+
+        messageInput.addEventListener(
+            "keydown",
+            function(event) {
+
+                if (event.key === "Enter") {
+
+                    event.preventDefault();
+
+                    sendMessage();
+                }
+            }
+        );
+
+
+        // =====================================================
+        // ESCAPE HTML
+        // =====================================================
+
+        function escapeHTML(text) {
+
+            const div =
+                document.createElement("div");
+
+            div.textContent = text;
+
+            return div.innerHTML;
+        }
+
+
+        // =====================================================
+        // INITIAL LOAD
+        // =====================================================
+
+        loadMessages();
+
+
+        // =====================================================
+        // AUTO REFRESH
+        // =====================================================
+
+        setInterval(
+            loadMessages,
+            2000
+        );
+
+    </script>
+
+</body>
+
+</html>
