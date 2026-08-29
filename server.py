@@ -3,14 +3,22 @@ from flask_cors import CORS
 import sqlite3
 import secrets
 import string
+import os
 
 app = Flask(__name__)
 CORS(app)
 
-DATABASE = "chat.db"
+# =====================================================
+# DATABASE
+# =====================================================
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE = os.path.join(BASE_DIR, "chat.db")
 
 
-# ---------------- DATABASE CONNECTION ----------------
+# =====================================================
+# DATABASE CONNECTION
+# =====================================================
 
 def get_db():
     conn = sqlite3.connect(DATABASE)
@@ -18,9 +26,12 @@ def get_db():
     return conn
 
 
-# ---------------- INITIALIZE DATABASE ----------------
+# =====================================================
+# INITIALIZE DATABASE
+# =====================================================
 
 def init_db():
+
     conn = get_db()
 
     # Rooms table
@@ -47,26 +58,33 @@ def init_db():
     conn.close()
 
 
-# ---------------- UPGRADE OLD DATABASE ----------------
+# =====================================================
+# UPGRADE OLD DATABASE
+# =====================================================
 
 def upgrade_db():
+
     conn = get_db()
 
-    # Check messages table columns
     columns = conn.execute(
         "PRAGMA table_info(messages)"
     ).fetchall()
 
-    column_names = [column["name"] for column in columns]
+    column_names = [
+        column["name"]
+        for column in columns
+    ]
 
-    # Add room_code if old database doesn't have it
+    # Add room_code if missing
     if "room_code" not in column_names:
+
         conn.execute(
             "ALTER TABLE messages ADD COLUMN room_code TEXT"
         )
 
-    # Add device_id if old database doesn't have it
+    # Add device_id if missing
     if "device_id" not in column_names:
+
         conn.execute(
             "ALTER TABLE messages ADD COLUMN device_id TEXT"
         )
@@ -75,176 +93,339 @@ def upgrade_db():
     conn.close()
 
 
-# ---------------- GET MESSAGES ----------------
+# =====================================================
+# IMPORTANT
+# INITIALIZE DATABASE WHEN SERVER STARTS
+# =====================================================
+
+try:
+
+    init_db()
+    upgrade_db()
+
+    print("Database initialized successfully.")
+
+except Exception as error:
+
+    print("Database initialization error:", error)
+
+
+# =====================================================
+# GET MESSAGES
+# =====================================================
 
 @app.get("/messages")
 def get_messages():
 
-    room_code = request.args.get("code", "").strip().upper()
+    room_code = request.args.get(
+        "code",
+        ""
+    ).strip().upper()
 
     if not room_code:
+
         return jsonify({
             "error": "Room code is required"
         }), 400
 
-    conn = get_db()
+    try:
 
-    rows = conn.execute("""
-        SELECT id, room_code, name, text, device_id, timestamp
-        FROM messages
-        WHERE room_code = ?
-        ORDER BY id ASC
-    """, (room_code,)).fetchall()
+        conn = get_db()
 
-    conn.close()
+        rows = conn.execute("""
+            SELECT
+                id,
+                room_code,
+                name,
+                text,
+                device_id,
+                timestamp
+            FROM messages
+            WHERE room_code = ?
+            ORDER BY id ASC
+        """, (room_code,)).fetchall()
 
-    return jsonify([
-        dict(row) for row in rows
-    ])
+        conn.close()
+
+        return jsonify([
+            dict(row)
+            for row in rows
+        ])
+
+    except Exception as error:
+
+        print("Get messages error:", error)
+
+        return jsonify({
+            "error": "Could not load messages"
+        }), 500
 
 
-# ---------------- SEND MESSAGE ----------------
+# =====================================================
+# SEND MESSAGE
+# =====================================================
 
 @app.post("/messages")
 def send_message():
 
-    data = request.get_json()
+    data = request.get_json(silent=True)
 
     if not data:
+
         return jsonify({
             "error": "Invalid JSON"
         }), 400
 
-    room_code = data.get("room_code", "").strip().upper()
-    name = data.get("name", "").strip()
-    text = data.get("text", "").strip()
-    device_id = data.get("device_id", "").strip()
+    room_code = str(
+        data.get("room_code", "")
+    ).strip().upper()
+
+    name = str(
+        data.get("name", "")
+    ).strip()
+
+    text = str(
+        data.get("text", "")
+    ).strip()
+
+    device_id = str(
+        data.get("device_id", "")
+    ).strip()
 
     if not room_code:
+
         return jsonify({
             "error": "Room code is required"
         }), 400
 
     if not name or not text:
+
         return jsonify({
             "error": "Name and message are required"
         }), 400
 
     if not device_id:
+
         return jsonify({
             "error": "Device ID is required"
         }), 400
 
-    conn = get_db()
+    try:
 
-    # Check whether room exists
-    room = conn.execute(
-        "SELECT code FROM rooms WHERE code = ?",
-        (room_code,)
-    ).fetchone()
+        conn = get_db()
 
-    if room is None:
+        # Check room
+        room = conn.execute(
+            """
+            SELECT code
+            FROM rooms
+            WHERE code = ?
+            """,
+            (room_code,)
+        ).fetchone()
+
+        if room is None:
+
+            conn.close()
+
+            return jsonify({
+                "error": "Room does not exist"
+            }), 404
+
+        # Insert message
+        cursor = conn.execute(
+            """
+            INSERT INTO messages
+            (
+                room_code,
+                name,
+                text,
+                device_id
+            )
+            VALUES (?, ?, ?, ?)
+            """,
+            (
+                room_code,
+                name,
+                text,
+                device_id
+            )
+        )
+
+        conn.commit()
+
+        message_id = cursor.lastrowid
+
+        # Get inserted message
+        row = conn.execute(
+            """
+            SELECT
+                id,
+                room_code,
+                name,
+                text,
+                device_id,
+                timestamp
+            FROM messages
+            WHERE id = ?
+            """,
+            (message_id,)
+        ).fetchone()
+
         conn.close()
 
+        return jsonify(
+            dict(row)
+        ), 201
+
+    except Exception as error:
+
+        print("Send message error:", error)
+
         return jsonify({
-            "error": "Room does not exist"
-        }), 404
-
-    # Insert message
-    cursor = conn.execute("""
-        INSERT INTO messages (room_code, name, text, device_id)
-        VALUES (?, ?, ?, ?)
-    """, (room_code, name, text, device_id))
-
-    conn.commit()
-
-    message_id = cursor.lastrowid
-
-    # Get inserted message
-    row = conn.execute("""
-        SELECT id, room_code, name, text, device_id, timestamp
-        FROM messages
-        WHERE id = ?
-    """, (message_id,)).fetchone()
-
-    conn.close()
-
-    return jsonify(dict(row)), 201
+            "error": "Could not send message"
+        }), 500
 
 
-# ---------------- CREATE ROOM ----------------
+# =====================================================
+# CREATE ROOM
+# =====================================================
 
 @app.post("/create-room")
 def create_room():
 
-    conn = get_db()
+    try:
 
-    while True:
+        conn = get_db()
 
-        code = ''.join(
-            secrets.choice(
-                string.ascii_uppercase + string.digits
+        while True:
+
+            code = ''.join(
+                secrets.choice(
+                    string.ascii_uppercase +
+                    string.digits
+                )
+                for _ in range(6)
             )
-            for _ in range(6)
+
+            existing = conn.execute(
+                """
+                SELECT code
+                FROM rooms
+                WHERE code = ?
+                """,
+                (code,)
+            ).fetchone()
+
+            if existing is None:
+
+                break
+
+        conn.execute(
+            """
+            INSERT INTO rooms (code)
+            VALUES (?)
+            """,
+            (code,)
         )
 
-        existing = conn.execute(
-            "SELECT code FROM rooms WHERE code = ?",
-            (code,)
-        ).fetchone()
+        conn.commit()
+        conn.close()
 
-        if existing is None:
-            break
+        print(
+            "Room created successfully:",
+            code
+        )
 
-    conn.execute(
-        "INSERT INTO rooms (code) VALUES (?)",
-        (code,)
-    )
+        return jsonify({
+            "code": code
+        }), 201
 
-    conn.commit()
-    conn.close()
+    except Exception as error:
 
-    return jsonify({
-        "code": code
-    }), 201
+        print(
+            "CREATE ROOM ERROR:",
+            error
+        )
+
+        return jsonify({
+            "error": str(error)
+        }), 500
 
 
-# ---------------- CHECK ROOM ----------------
+# =====================================================
+# CHECK ROOM
+# =====================================================
 
 @app.get("/check-room/<code>")
 def check_room(code):
 
     code = code.strip().upper()
 
-    conn = get_db()
+    try:
 
-    room = conn.execute(
-        "SELECT code FROM rooms WHERE code = ?",
-        (code,)
-    ).fetchone()
+        conn = get_db()
 
-    conn.close()
+        room = conn.execute(
+            """
+            SELECT code
+            FROM rooms
+            WHERE code = ?
+            """,
+            (code,)
+        ).fetchone()
 
-    if room is None:
+        conn.close()
+
+        if room is None:
+
+            return jsonify({
+                "exists": False
+            }), 404
+
         return jsonify({
-            "exists": False
-        }), 404
+            "exists": True,
+            "code": code
+        }), 200
+
+    except Exception as error:
+
+        print(
+            "Check room error:",
+            error
+        )
+
+        return jsonify({
+            "error": "Could not check room"
+        }), 500
+
+
+# =====================================================
+# HOME / HEALTH CHECK
+# =====================================================
+
+@app.get("/")
+def home():
 
     return jsonify({
-        "exists": True,
-        "code": code
-    }), 200
+        "status": "online",
+        "message": "Yaadain backend is running ❤️"
+    })
 
 
-# ---------------- START SERVER ----------------
+# =====================================================
+# START SERVER
+# =====================================================
 
 if __name__ == "__main__":
 
-    init_db()
-    upgrade_db()
-
     app.run(
         host="0.0.0.0",
-        port=5000,
+        port=int(
+            os.environ.get(
+                "PORT",
+                5000
+            )
+        ),
         debug=True
     )
